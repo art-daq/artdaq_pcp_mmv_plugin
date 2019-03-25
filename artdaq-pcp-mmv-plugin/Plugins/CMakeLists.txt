@@ -1,6 +1,7 @@
 
 basic_plugin(pcpmmv "metric"
   artdaq-utilities_Plugins
+  pcp_mmv
   ${FHICLCPP}
   ${CETLIB}
   ${CETLIB_EXCEPT}
