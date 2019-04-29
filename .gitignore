@@ -1,0 +1,6 @@
+*~
+*.png
+.editorconfig
+bin/*
+obj/*
+*.vcxproj*
