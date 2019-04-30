@@ -1,0 +1,10 @@
+daq.metrics.pcpmmv: { # Can be named anything.
+                       # If you're using multiple instances of the PCP-MMV plugin, they must have unique names
+  #
+  # Metric Plugin Configuration (Common to all ARTDAQ Metric Plugins)
+  #
+  level: 0 # Integer, verbosity level of metrics that will be recorded by this plugin. 
+           # 0 is minimum amount, maximum is implementation-defined.
+  metricPluginType: "pcpmmv" # Must be "pcpmmv" for the plugin to be loaded
+  reporting_interval: 15.0 # Double value, the frequency in seconds that the plugin sends out metrics
+}
