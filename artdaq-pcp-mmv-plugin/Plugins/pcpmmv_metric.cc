@@ -66,7 +66,7 @@ private:
 
 		auto pos = nameTemp.find('%');
 		while (pos != std::string::npos)
-		{	
+		{
 			nameTemp = nameTemp.replace(pos, 1, "Percent");
 			pos = nameTemp.find('%');
 		}
