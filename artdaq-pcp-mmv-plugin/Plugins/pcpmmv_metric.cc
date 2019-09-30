@@ -7,8 +7,8 @@
 #ifndef __PCPMMV_METRIC__
 #define __PCPMMV_METRIC__ 1
 
-#define TRACE_NAME "PCPMMVMetric"
-#include "tracemf.h"
+#include "TRACE/tracemf.h"  // order matters -- trace.h (no "mf") is nested from MetricMacros.hh
+#define TRACE_NAME (app_name_ + "_pcpmmv_metric").c_str()
 
 #include "artdaq-utilities/Plugins/MetricMacros.hh"
 #include "fhiclcpp/fwd.h"
@@ -45,8 +45,8 @@ private:
 		if (registered_metrics_.size() > 0)
 		{
 			mmv_stats_flags_t flags{};
-			TLOG(TLVL_INFO) << "Going to initialize mmv metric with name " << normalize_name_(app_name_) << ", metric count " << registered_metrics_.size();
-			TLOG(TLVL_INFO) << "First metric name: " << registered_metrics_[0].name << ", type " << registered_metrics_[0].type << ", item " << registered_metrics_[0].item;
+			METLOG(TLVL_INFO) << "Going to initialize mmv metric with name " << normalize_name_(app_name_) << ", metric count " << registered_metrics_.size();
+			METLOG(TLVL_INFO) << "First metric name: " << registered_metrics_[0].name << ", type " << registered_metrics_[0].type << ", item " << registered_metrics_[0].item;
 			mmvAddr_ = mmv_stats_init(normalize_name_(app_name_).c_str(), domain_, flags, &registered_metrics_[0], registered_metrics_.size(), 0, 0);
 		}
 	}
@@ -82,7 +82,7 @@ private:
 	bool check_time_()
 	{
 		auto dur = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - metric_start_time_).count();
-		TLOG(TLVL_INFO) << "Duration since start: " << dur << " seconds. (initial = " << initial_metric_collection_time_ << " seconds)";
+		METLOG(TLVL_INFO) << "Duration since start: " << dur << " seconds. (initial = " << initial_metric_collection_time_ << " seconds)";
 		if (dur < 0) return false;
 		return static_cast<size_t>(dur) > initial_metric_collection_time_;
 	}
@@ -157,8 +157,8 @@ public:
    * pcp_domain_number can be used to change the domain parameter
    * seconds_before_init determines how long the metric will wait, collecting metric names before starting to log metrics (to reduce the number of stop/init cycles)
    */
-	explicit PCPMMVMetric(fhicl::ParameterSet const& pset, std::string const& app_name)
-	    : MetricPlugin(pset, app_name)
+	explicit PCPMMVMetric(fhicl::ParameterSet const& pset, std::string const& app_name, std::string const& metric_name)
+	    : MetricPlugin(pset, app_name, metric_name)
 	    , registered_metric_types_()
 	    , registered_metrics_()
 	    , mmvAddr_(nullptr)
@@ -195,7 +195,7 @@ public:
 		auto nname = normalize_name_(name);
 		if (!registered_metric_types_.count(nname))
 		{
-			TLOG(TLVL_INFO) << "Adding string metric named " << nname;
+			METLOG(TLVL_INFO) << "Adding string metric named " << nname;
 			mmv_metric_t newMetric;
 			strcpy(newMetric.name, nname.c_str());
 			newMetric.item = registered_metrics_.size();
@@ -213,8 +213,8 @@ public:
 
 		if (registered_metric_types_[nname] != MMV_TYPE_STRING)
 		{
-			TLOG(TLVL_ERROR) << "PCP-MMV Metric: Metric instance has wrong type! Expected " << registered_metric_types_[nname]
-			                 << ", got std::string";
+			METLOG(TLVL_ERROR) << "PCP-MMV Metric: Metric instance has wrong type! Expected " << registered_metric_types_[nname]
+			                   << ", got std::string";
 			return;
 		}
 
@@ -247,7 +247,7 @@ public:
 		auto nname = normalize_name_(name);
 		if (!registered_metric_types_.count(nname))
 		{
-			TLOG(TLVL_INFO) << "Adding int metric named " << nname;
+			METLOG(TLVL_INFO) << "Adding int metric named " << nname;
 			mmv_metric_t newMetric;
 			strcpy(newMetric.name, nname.c_str());
 			newMetric.item = registered_metrics_.size();
@@ -265,8 +265,8 @@ public:
 
 		if (registered_metric_types_[nname] != MMV_TYPE_I64)
 		{
-			TLOG(TLVL_ERROR) << "PCP-MMV Metric: Metric instance has wrong type! Expected " << registered_metric_types_[nname]
-			                 << ", got int";
+			METLOG(TLVL_ERROR) << "PCP-MMV Metric: Metric instance has wrong type! Expected " << registered_metric_types_[nname]
+			                   << ", got int";
 			return;
 		}
 
@@ -293,7 +293,7 @@ public:
 		auto nname = normalize_name_(name);
 		if (!registered_metric_types_.count(nname))
 		{
-			TLOG(TLVL_INFO) << "Adding double metric named " << nname;
+			METLOG(TLVL_INFO) << "Adding double metric named " << nname;
 			mmv_metric_t newMetric;
 			strcpy(newMetric.name, nname.c_str());
 			newMetric.item = registered_metrics_.size();
@@ -311,8 +311,8 @@ public:
 
 		if (registered_metric_types_[nname] != MMV_TYPE_DOUBLE)
 		{
-			TLOG(TLVL_ERROR) << "PCP-MMV Metric: Metric instance has wrong type! Expected " << registered_metric_types_[nname]
-			                 << ", got double";
+			METLOG(TLVL_ERROR) << "PCP-MMV Metric: Metric instance has wrong type! Expected " << registered_metric_types_[nname]
+			                   << ", got double";
 			return;
 		}
 
@@ -339,7 +339,7 @@ public:
 		auto nname = normalize_name_(name);
 		if (!registered_metric_types_.count(nname))
 		{
-			TLOG(TLVL_INFO) << "Adding float metric named " << nname;
+			METLOG(TLVL_INFO) << "Adding float metric named " << nname;
 			mmv_metric_t newMetric;
 			strcpy(newMetric.name, nname.c_str());
 			newMetric.item = registered_metrics_.size();
@@ -357,8 +357,8 @@ public:
 
 		if (registered_metric_types_[nname] != MMV_TYPE_FLOAT)
 		{
-			TLOG(TLVL_ERROR) << "PCP-MMV Metric: Metric instance has wrong type! Expected " << registered_metric_types_[nname]
-			                 << ", got float";
+			METLOG(TLVL_ERROR) << "PCP-MMV Metric: Metric instance has wrong type! Expected " << registered_metric_types_[nname]
+			                   << ", got float";
 			return;
 		}
 
@@ -385,7 +385,7 @@ public:
 		auto nname = normalize_name_(name);
 		if (!registered_metric_types_.count(nname))
 		{
-			TLOG(TLVL_INFO) << "Adding unsigned metric named " << nname;
+			METLOG(TLVL_INFO) << "Adding unsigned metric named " << nname;
 			mmv_metric_t newMetric;
 			strcpy(newMetric.name, nname.c_str());
 			newMetric.item = registered_metrics_.size();
@@ -403,8 +403,8 @@ public:
 
 		if (registered_metric_types_[nname] != MMV_TYPE_U64)
 		{
-			TLOG(TLVL_ERROR) << "PCP-MMV Metric: Metric instance has wrong type! Expected " << registered_metric_types_[nname]
-			                 << ", got unsigned int";
+			METLOG(TLVL_ERROR) << "PCP-MMV Metric: Metric instance has wrong type! Expected " << registered_metric_types_[nname]
+			                   << ", got unsigned int";
 			return;
 		}
 
