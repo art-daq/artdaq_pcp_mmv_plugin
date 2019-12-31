@@ -190,7 +190,7 @@ public:
    * \param value Value of the metric
    * \param unit Units of the metric
    */
-	void sendMetric_(const std::string& name, const std::string& value, const std::string& unit) override
+	void sendMetric_(const std::string& name, const std::string& value, const std::string& unit, const std::chrono::system_clock::time_point&) override
 	{
 		auto nname = normalize_name_(name);
 		if (!registered_metric_types_.count(nname))
@@ -242,7 +242,7 @@ public:
    * \param value Value of the metric
    * \param unit Units of the metric
    */
-	void sendMetric_(const std::string& name, const int& value, const std::string& unit) override
+	void sendMetric_(const std::string& name, const int& value, const std::string& unit, const std::chrono::system_clock::time_point&) override
 	{
 		auto nname = normalize_name_(name);
 		if (!registered_metric_types_.count(nname))
@@ -288,7 +288,7 @@ public:
    * \param value Value of the metric
    * \param unit Units of the metric
    */
-	void sendMetric_(const std::string& name, const double& value, const std::string& unit) override
+	void sendMetric_(const std::string& name, const double& value, const std::string& unit, const std::chrono::system_clock::time_point&) override
 	{
 		auto nname = normalize_name_(name);
 		if (!registered_metric_types_.count(nname))
@@ -334,7 +334,7 @@ public:
    * \param value Value of the metric
    * \param unit Units of the metric
    */
-	void sendMetric_(const std::string& name, const float& value, const std::string& unit) override
+	void sendMetric_(const std::string& name, const float& value, const std::string& unit, const std::chrono::system_clock::time_point&) override
 	{
 		auto nname = normalize_name_(name);
 		if (!registered_metric_types_.count(nname))
@@ -380,7 +380,7 @@ public:
    * \param value Value of the metric
    * \param unit Units of the metric
    */
-	void sendMetric_(const std::string& name, const unsigned long int& value, const std::string& unit) override
+	void sendMetric_(const std::string& name, const unsigned long int& value, const std::string& unit, const std::chrono::system_clock::time_point&) override
 	{
 		auto nname = normalize_name_(name);
 		if (!registered_metric_types_.count(nname))
