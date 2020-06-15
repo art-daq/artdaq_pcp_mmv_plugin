@@ -119,7 +119,7 @@ private:
 		if (auto pos = unitString.find('/') != std::string::npos)
 		{
 			before = unitString.substr(0, static_cast<int>(pos) - 1);
-			after = unitString.substr(static_cast<std::__1::basic_string<char, struct std::__1::char_traits<char>, class std::__1::allocator<char> >::size_type>(pos));
+			after = unitString.substr(pos);
 		}
 		std::istringstream iss(before);
 		std::vector<std::string> before_tokens{std::istream_iterator<std::string>{iss},
