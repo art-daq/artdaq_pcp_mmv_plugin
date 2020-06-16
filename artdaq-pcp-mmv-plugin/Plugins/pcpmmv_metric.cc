@@ -172,6 +172,11 @@ private:
 		return output;
 	}
 
+	PCPMMVMetric(PCPMMVMetric const&) = delete;
+	PCPMMVMetric(PCPMMVMetric&&) = delete;
+	PCPMMVMetric& operator=(PCPMMVMetric const&) = delete;
+	PCPMMVMetric& operator=(PCPMMVMetric&&) = delete;
+
 public:
 	/**
    * \brief Construct an instance of the PCPMMV metric
@@ -402,7 +407,7 @@ public:
    * \param value Value of the metric
    * \param unit Units of the metric
    */
-	void sendMetric_(const std::string& name, const unsigned long int& value, const std::string& unit) override
+	void sendMetric_(const std::string& name, const uint64_t& value, const std::string& unit) override
 	{
 		auto nname = normalize_name_(name);
 		if (registered_metric_types_.count(nname) == 0u)
