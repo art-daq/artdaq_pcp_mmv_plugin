@@ -13,9 +13,12 @@
 #include "artdaq-utilities/Plugins/MetricMacros.hh"
 #include "fhiclcpp/fwd.h"
 
+// pmapi.h must be included before mmv_stats.h
 #include <pcp/pmapi.h>
 
 #include <pcp/mmv_stats.h>
+
+#include <utility>
 
 /**
  * \brief The artdaq namespace
@@ -28,7 +31,7 @@ namespace artdaq {
  * Run artdaq, and ensure that the metrics are now available through `pminfo -f mmv`. Then,
  * run (as root) `cd /var/lib/pcp/pmlogger;pmlogconf -r config.default` and restart pmlogger.
  */
-class PCPMMVMetric : public MetricPlugin
+class PCPMMVMetric final : public MetricPlugin
 {
 private:
 	std::unordered_map<std::string, int> registered_metric_types_;
@@ -40,20 +43,29 @@ private:
 	size_t initial_metric_collection_time_;
 	std::chrono::steady_clock::time_point metric_start_time_;
 
+	void copy_string(char* dest, size_t dstsize, const std::string& src)
+	{
+		if (src.size() <= dstsize - 1)
+		{
+			dstsize = src.size() + 1;
+		}
+		memcpy(dest, src.c_str(), dstsize);
+	}
+
 	void init_mmv()
 	{
-		if (registered_metrics_.size() > 0)
+		if (!registered_metrics_.empty())
 		{
 			mmv_stats_flags_t flags{};
 			TLOG(TLVL_INFO) << "Going to initialize mmv metric with name " << normalize_name_(app_name_) << ", metric count " << registered_metrics_.size();
 			TLOG(TLVL_INFO) << "First metric name: " << registered_metrics_[0].name << ", type " << registered_metrics_[0].type << ", item " << registered_metrics_[0].item;
-			mmvAddr_ = mmv_stats_init(normalize_name_(app_name_).c_str(), domain_, flags, &registered_metrics_[0], registered_metrics_.size(), 0, 0);
+			mmvAddr_ = mmv_stats_init(normalize_name_(app_name_).c_str(), domain_, flags, &registered_metrics_[0], registered_metrics_.size(), nullptr, 0);
 		}
 	}
 
 	void stop_mmv()
 	{
-		if (mmvAddr_)
+		if (mmvAddr_ != nullptr)
 		{
 			mmv_stats_stop(normalize_name_(app_name_).c_str(), mmvAddr_);
 			mmvAddr_ = nullptr;
@@ -62,7 +74,7 @@ private:
 
 	std::string normalize_name_(std::string name)
 	{
-		auto nameTemp(name);
+		auto nameTemp(std::move(name));
 
 		auto pos = nameTemp.find('%');
 		while (pos != std::string::npos)
@@ -83,7 +95,10 @@ private:
 	{
 		auto dur = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - metric_start_time_).count();
 		TLOG(TLVL_INFO) << "Duration since start: " << dur << " seconds. (initial = " << initial_metric_collection_time_ << " seconds)";
-		if (dur < 0) return false;
+		if (dur < 0)
+		{
+			return false;
+		}
 		return static_cast<size_t>(dur) > initial_metric_collection_time_;
 	}
 
@@ -93,14 +108,17 @@ private:
 		output.scaleCount = PM_COUNT_ONE;
 		output.scaleSpace = PM_SPACE_BYTE;
 		output.scaleTime = PM_TIME_SEC;
+		output.dimTime = 0;
+		output.dimSpace = 0;
+		output.dimCount = 0;
 
 		std::transform(unitString.begin(), unitString.end(), unitString.begin(), ::tolower);
 		std::string before = unitString;
-		std::string after = "";
+		std::string after;
 
 		if (auto pos = unitString.find('/') != std::string::npos)
 		{
-			before = unitString.substr(0, pos - 1);
+			before = unitString.substr(0, static_cast<int>(pos) - 1);
 			after = unitString.substr(pos);
 		}
 		std::istringstream iss(before);
@@ -111,9 +129,12 @@ private:
 		std::vector<std::string> after_tokens{std::istream_iterator<std::string>{iss},
 		                                      std::istream_iterator<std::string>{}};
 
-		for (auto token : before_tokens)
+		for (const auto& token : before_tokens)
 		{
-			if (token == "") continue;
+			if (token.empty())
+			{
+				continue;
+			}
 			if (token == "s" || token.find("sec") == 0)
 			{
 				output.dimTime++;
@@ -128,9 +149,12 @@ private:
 			}
 		}
 
-		for (auto token : after_tokens)
+		for (const auto& token : after_tokens)
 		{
-			if (token == "") continue;
+			if (token.empty())
+			{
+				continue;
+			}
 			if (token == "s" || token.find("sec") == 0)
 			{
 				output.dimTime--;
@@ -148,6 +172,11 @@ private:
 		return output;
 	}
 
+	PCPMMVMetric(PCPMMVMetric const&) = delete;
+	PCPMMVMetric(PCPMMVMetric&&) = delete;
+	PCPMMVMetric& operator=(PCPMMVMetric const&) = delete;
+	PCPMMVMetric& operator=(PCPMMVMetric&&) = delete;
+
 public:
 	/**
    * \brief Construct an instance of the PCPMMV metric
@@ -159,14 +188,12 @@ public:
    */
 	explicit PCPMMVMetric(fhicl::ParameterSet const& pset, std::string const& app_name)
 	    : MetricPlugin(pset, app_name)
-	    , registered_metric_types_()
-	    , registered_metrics_()
 	    , mmvAddr_(nullptr)
 	    , domain_(pset.get<int>("pcp_domain_number", 0))
 	    , initial_metric_collection_time_(pset.get<size_t>("seconds_before_init", 30))
 	{}
 
-	virtual ~PCPMMVMetric() { MetricPlugin::stopMetrics(); }
+	~PCPMMVMetric() override { MetricPlugin::stopMetrics(); }
 
 	/**
    * \brief Gets the unique library name of this plugin
@@ -193,18 +220,18 @@ public:
 	void sendMetric_(const std::string& name, const std::string& value, const std::string& unit) override
 	{
 		auto nname = normalize_name_(name);
-		if (!registered_metric_types_.count(nname))
+		if (registered_metric_types_.count(nname) == 0u)
 		{
 			TLOG(TLVL_INFO) << "Adding string metric named " << nname;
 			mmv_metric_t newMetric;
-			strcpy(newMetric.name, nname.c_str());
+			copy_string(newMetric.name, MMV_NAMEMAX, nname);
 			newMetric.item = registered_metrics_.size();
 			newMetric.type = MMV_TYPE_STRING;
 			newMetric.semantics = MMV_SEM_INSTANT;
 			newMetric.dimension = infer_units_(unit);
 			newMetric.indom = 0;
-			newMetric.helptext = 0;
-			newMetric.shorttext = 0;
+			newMetric.helptext = nullptr;
+			newMetric.shorttext = nullptr;
 
 			registered_metrics_.push_back(newMetric);
 			registered_metric_types_[nname] = MMV_TYPE_STRING;
@@ -218,14 +245,14 @@ public:
 			return;
 		}
 
-		if (!mmvAddr_ && check_time_())
+		if ((mmvAddr_ == nullptr) && check_time_())
 		{
 			init_mmv();
 		}
 
-		if (mmvAddr_)
+		if (mmvAddr_ != nullptr)
 		{
-			auto base = mmv_lookup_value_desc(mmvAddr_, nname.c_str(), 0);
+			auto base = mmv_lookup_value_desc(mmvAddr_, nname.c_str(), nullptr);
 			auto val = value;
 			if (val.size() > MMV_STRINGMAX - 1)
 			{
@@ -245,18 +272,18 @@ public:
 	void sendMetric_(const std::string& name, const int& value, const std::string& unit) override
 	{
 		auto nname = normalize_name_(name);
-		if (!registered_metric_types_.count(nname))
+		if (registered_metric_types_.count(nname) == 0u)
 		{
 			TLOG(TLVL_INFO) << "Adding int metric named " << nname;
 			mmv_metric_t newMetric;
-			strcpy(newMetric.name, nname.c_str());
+			copy_string(newMetric.name, MMV_NAMEMAX, nname);
 			newMetric.item = registered_metrics_.size();
 			newMetric.type = MMV_TYPE_I64;
 			newMetric.semantics = MMV_SEM_INSTANT;
 			newMetric.dimension = infer_units_(unit);
 			newMetric.indom = 0;
-			newMetric.helptext = 0;
-			newMetric.shorttext = 0;
+			newMetric.helptext = nullptr;
+			newMetric.shorttext = nullptr;
 
 			registered_metrics_.push_back(newMetric);
 			registered_metric_types_[nname] = MMV_TYPE_I64;
@@ -270,14 +297,14 @@ public:
 			return;
 		}
 
-		if (!mmvAddr_ && check_time_())
+		if ((mmvAddr_ == nullptr) && check_time_())
 		{
 			init_mmv();
 		}
 
-		if (mmvAddr_)
+		if (mmvAddr_ != nullptr)
 		{
-			auto base = mmv_lookup_value_desc(mmvAddr_, nname.c_str(), 0);
+			auto base = mmv_lookup_value_desc(mmvAddr_, nname.c_str(), nullptr);
 			mmv_set_value(mmvAddr_, base, value);
 		}
 	}
@@ -291,18 +318,18 @@ public:
 	void sendMetric_(const std::string& name, const double& value, const std::string& unit) override
 	{
 		auto nname = normalize_name_(name);
-		if (!registered_metric_types_.count(nname))
+		if (registered_metric_types_.count(nname) == 0u)
 		{
 			TLOG(TLVL_INFO) << "Adding double metric named " << nname;
 			mmv_metric_t newMetric;
-			strcpy(newMetric.name, nname.c_str());
+			copy_string(newMetric.name, MMV_NAMEMAX, nname);
 			newMetric.item = registered_metrics_.size();
 			newMetric.type = MMV_TYPE_DOUBLE;
 			newMetric.semantics = MMV_SEM_INSTANT;
 			newMetric.dimension = infer_units_(unit);
 			newMetric.indom = 0;
-			newMetric.helptext = 0;
-			newMetric.shorttext = 0;
+			newMetric.helptext = nullptr;
+			newMetric.shorttext = nullptr;
 
 			registered_metrics_.push_back(newMetric);
 			registered_metric_types_[nname] = MMV_TYPE_DOUBLE;
@@ -316,14 +343,14 @@ public:
 			return;
 		}
 
-		if (!mmvAddr_ && check_time_())
+		if ((mmvAddr_ == nullptr) && check_time_())
 		{
 			init_mmv();
 		}
 
-		if (mmvAddr_)
+		if (mmvAddr_ != nullptr)
 		{
-			auto base = mmv_lookup_value_desc(mmvAddr_, nname.c_str(), 0);
+			auto base = mmv_lookup_value_desc(mmvAddr_, nname.c_str(), nullptr);
 			mmv_set_value(mmvAddr_, base, value);
 		}
 	}
@@ -337,18 +364,18 @@ public:
 	void sendMetric_(const std::string& name, const float& value, const std::string& unit) override
 	{
 		auto nname = normalize_name_(name);
-		if (!registered_metric_types_.count(nname))
+		if (registered_metric_types_.count(nname) == 0u)
 		{
 			TLOG(TLVL_INFO) << "Adding float metric named " << nname;
 			mmv_metric_t newMetric;
-			strcpy(newMetric.name, nname.c_str());
+			copy_string(newMetric.name, MMV_NAMEMAX, nname);
 			newMetric.item = registered_metrics_.size();
 			newMetric.type = MMV_TYPE_FLOAT;
 			newMetric.semantics = MMV_SEM_INSTANT;
 			newMetric.dimension = infer_units_(unit);
 			newMetric.indom = 0;
-			newMetric.helptext = 0;
-			newMetric.shorttext = 0;
+			newMetric.helptext = nullptr;
+			newMetric.shorttext = nullptr;
 
 			registered_metrics_.push_back(newMetric);
 			registered_metric_types_[nname] = MMV_TYPE_FLOAT;
@@ -362,14 +389,14 @@ public:
 			return;
 		}
 
-		if (!mmvAddr_ && check_time_())
+		if ((mmvAddr_ == nullptr) && check_time_())
 		{
 			init_mmv();
 		}
 
-		if (mmvAddr_)
+		if (mmvAddr_ != nullptr)
 		{
-			auto base = mmv_lookup_value_desc(mmvAddr_, nname.c_str(), 0);
+			auto base = mmv_lookup_value_desc(mmvAddr_, nname.c_str(), nullptr);
 			mmv_set_value(mmvAddr_, base, value);
 		}
 	}
@@ -380,21 +407,21 @@ public:
    * \param value Value of the metric
    * \param unit Units of the metric
    */
-	void sendMetric_(const std::string& name, const unsigned long int& value, const std::string& unit) override
+	void sendMetric_(const std::string& name, const uint64_t& value, const std::string& unit) override
 	{
 		auto nname = normalize_name_(name);
-		if (!registered_metric_types_.count(nname))
+		if (registered_metric_types_.count(nname) == 0u)
 		{
 			TLOG(TLVL_INFO) << "Adding unsigned metric named " << nname;
 			mmv_metric_t newMetric;
-			strcpy(newMetric.name, nname.c_str());
+			copy_string(newMetric.name, MMV_NAMEMAX, nname);
 			newMetric.item = registered_metrics_.size();
 			newMetric.type = MMV_TYPE_U64;
 			newMetric.semantics = MMV_SEM_INSTANT;
 			newMetric.dimension = infer_units_(unit);
 			newMetric.indom = 0;
-			newMetric.helptext = 0;
-			newMetric.shorttext = 0;
+			newMetric.helptext = nullptr;
+			newMetric.shorttext = nullptr;
 
 			registered_metrics_.push_back(newMetric);
 			registered_metric_types_[nname] = MMV_TYPE_U64;
@@ -408,14 +435,14 @@ public:
 			return;
 		}
 
-		if (!mmvAddr_ && check_time_())
+		if ((mmvAddr_ == nullptr) && check_time_())
 		{
 			init_mmv();
 		}
 
-		if (mmvAddr_)
+		if (mmvAddr_ != nullptr)
 		{
-			auto base = mmv_lookup_value_desc(mmvAddr_, nname.c_str(), 0);
+			auto base = mmv_lookup_value_desc(mmvAddr_, nname.c_str(), nullptr);
 			mmv_set_value(mmvAddr_, base, value);
 		}
 	}
