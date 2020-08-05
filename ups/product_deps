@@ -25,6 +25,13 @@ end_product_list
 # -nq- means there is no qualifier
 # a "-" mans the dependent product is not required by the parent and will not be setup
 qualifier        artdaq_utilities  notes
+c7:s100:debug	c7:s100:debug			-std=c++17
+c7:s100:prof	c7:s100:prof			-std=c++17
+e20:s100:debug	e20:s100:debug			-std=c++17
+e20:s100:prof	e20:s100:prof			-std=c++17
+e19:s100:debug	e19:s100:debug			-std=c++17
+e19:s100:prof	e19:s100:prof			-std=c++17
+
 c7:s96:debug	c7:s96:debug			-std=c++17
 c7:s96:prof	c7:s96:prof			-std=c++17
 e19:s96:debug	e19:s96:debug			-std=c++17
