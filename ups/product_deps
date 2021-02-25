@@ -1,7 +1,7 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent artdaq_pcp_mmv_plugin	v1_00_08
-defaultqual	e19:s96
+parent artdaq_pcp_mmv_plugin	v1_00_09
+defaultqual	e19:s97
 
 # These optional lines define the installed directories where
 # headers, libraries, and executables will be found
@@ -17,7 +17,7 @@ bindir      fq_dir      bin
 
 #
 product		version		optional
-artdaq_utilities v1_05_10
+artdaq_utilities v1_05_11
 cetbuildtools	v7_17_01	-	only_for_build
 end_product_list
 
