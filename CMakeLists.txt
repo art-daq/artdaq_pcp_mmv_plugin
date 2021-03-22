@@ -13,10 +13,11 @@
 #  make package
 # ======================================================================
 
-# use cmake 2.8 or later
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.17)
 
-project(artdaq-pcp-mmv-plugin)
+find_package(cetbuildtools)
+
+project(artdaq_pcp_mmv_plugin VERSION 1.00.09)
 # cetbuildtools contains our cmake modules
 SET ( CETBUILDTOOLS_VERSION $ENV{CETBUILDTOOLS_VERSION} )
 IF (NOT CETBUILDTOOLS_VERSION)
