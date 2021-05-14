@@ -64,9 +64,6 @@ find_ups_product( artdaq_utilities v1_00_00 )
 find_ups_boost(v1_53_0)
 find_ups_product (cetbuildtools v4_09_02)
 find_ups_product( TRACE v3_03_00 )
-find_ups_product( cetlib v1_08_00 )
-find_ups_product( cetpkgsupport v1_08_03 )
-find_ups_product( fhiclcpp v3_04_00 )
 find_ups_product( messagefacility v1_14_01 )
 
 # as of art v2_11_00, messagefacility has a single library
