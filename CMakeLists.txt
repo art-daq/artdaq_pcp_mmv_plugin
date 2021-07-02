@@ -61,7 +61,7 @@ if(BTYPE_UC STREQUAL DEBUG)
 	endif()
 endif()
 
-cet_report_compiler_flags()
+#cet_report_compiler_flags()
 
 # these are minimum required versions, not the actual product versions
 find_ups_product( artdaq_utilities v1_00_00 )
