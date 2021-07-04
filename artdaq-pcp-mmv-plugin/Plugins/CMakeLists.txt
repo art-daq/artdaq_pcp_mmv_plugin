@@ -5,7 +5,7 @@ basic_plugin(pcpmmv "metric"
   ${FHICLCPP}
   ${CETLIB}
   ${CETLIB_EXCEPT}
-  ${MESSAGEFACILITY_LIBS}
+  ${MF_MESSAGEFACILITY}
 )
 
 install_headers()
