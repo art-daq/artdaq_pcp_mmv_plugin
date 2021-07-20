@@ -2,9 +2,9 @@
 basic_plugin(pcpmmv "metric"
   artdaq_utilities::artdaq-utilities_Plugins
   pcp_mmv
-  ${FHICLCPP}
-  ${CETLIB}
-  ${CETLIB_EXCEPT}
+  fhiclcpp
+  cetlib
+  cetlib_except
   ${MF_MESSAGEFACILITY}
 )
 

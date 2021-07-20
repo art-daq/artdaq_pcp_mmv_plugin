@@ -30,7 +30,6 @@ set(CMAKE_MODULE_PATH $ENV{CETBUILDTOOLS_DIR}/Modules
 
 include(CetCMakeEnv)
 cet_cmake_env()
-set(artdaq_pcp_mmv_plugin_OLD_STYLE_CONFIG_VARS TRUE)
 
 cet_set_compiler_flags(DIAGS VIGILANT
   WERROR
