@@ -1,11 +1,11 @@
 
 basic_plugin(pcpmmv "metric"
-  artdaq-utilities_Plugins
+  artdaq_utilities::artdaq-utilities_Plugins
   pcp_mmv
-  ${FHICLCPP}
-  ${CETLIB}
-  ${CETLIB_EXCEPT}
-  ${MESSAGEFACILITY_LIBS}
+  fhiclcpp
+  cetlib
+  cetlib_except
+  ${MF_MESSAGEFACILITY}
 )
 
 install_headers()
