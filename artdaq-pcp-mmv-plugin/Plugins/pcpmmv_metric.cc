@@ -182,6 +182,7 @@ public:
    * \brief Construct an instance of the PCPMMV metric
    * \param pset Parameter set with which to configure the MetricPlugin. 
    * \param app_name Name of the application sending metrics
+   * \param metric_name Name for this metric instance
    *
    * pcp_domain_number can be used to change the domain parameter
    * seconds_before_init determines how long the metric will wait, collecting metric names before starting to log metrics (to reduce the number of stop/init cycles)
