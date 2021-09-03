@@ -83,7 +83,4 @@ add_subdirectory(artdaq-pcp-mmv-plugin)
 # doc - Documentation
 add_subdirectory(doc)
 
-# ups - table and config files
-add_subdirectory(ups)
-
 cet_cmake_config()
