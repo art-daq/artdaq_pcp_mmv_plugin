@@ -20,7 +20,7 @@ set(CET_CETBUILDTOOLS_COMPAT TRUE)
 include(Compatibility)
 set(CET_WARN_DEPRECATED)
 
-project(artdaq_pcp_mmv_plugin VERSION 1.02.00)
+project(artdaq_pcp_mmv_plugin VERSION 1.02.01)
 
 set(CMAKE_MODULE_PATH
                       $ENV{ARTDAQ_UTILITIES_DIR}/Modules
