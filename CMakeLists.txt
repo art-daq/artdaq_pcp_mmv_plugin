@@ -13,18 +13,11 @@
 #  make package
 # ======================================================================
 
-cmake_minimum_required (VERSION 3.17)
+cmake_minimum_required (VERSION 3.19 FATAL_ERROR)
 
-find_package(cetmodules)
-set(CET_CETBUILDTOOLS_COMPAT TRUE)
-include(Compatibility)
-set(CET_WARN_DEPRECATED)
+find_package(cetmodules 3.08.00 REQUIRED)
 
 project(artdaq_pcp_mmv_plugin VERSION 1.02.02)
-
-set(CMAKE_MODULE_PATH
-                      $ENV{ARTDAQ_UTILITIES_DIR}/Modules
-		      ${CMAKE_MODULE_PATH})
 
 include(CetCMakeEnv)
 cet_cmake_env()
@@ -59,23 +52,13 @@ if(BTYPE_UC STREQUAL DEBUG)
 endif()
 
 #cet_report_compiler_flags()
-
-# these are minimum required versions, not the actual product versions
-find_ups_product( artdaq_utilities v1_00_00 )
-#find_ups_product( gcc v4_0_0 )
-find_ups_boost(v1_53_0)
-find_ups_product (cetbuildtools v4_09_02)
-find_ups_product( TRACE v3_03_00 )
-find_ups_product( messagefacility v1_14_01 )
+find_package(artdaq_utilities 1.07.02 REQUIRED)
 
 # Debug streamer.
 string(TOUPPER ${CMAKE_BUILD_TYPE} BTYPE_UC)
 if(BTYPE_UC STREQUAL DEBUG)
   add_definitions(-DDEBUGME)
 endif()
-
-# macros for artdaq_dictionary and simple_plugin
-include(BasicPlugin)
 
 # Source
 add_subdirectory(artdaq-pcp-mmv-plugin)

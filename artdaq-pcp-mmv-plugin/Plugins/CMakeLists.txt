@@ -1,12 +1,7 @@
 
-basic_plugin(pcpmmv "metric"
-  artdaq_utilities::artdaq-utilities_Plugins
-  pcp_mmv
-  fhiclcpp
-  cetlib
-  cetlib_except
-  ${MF_MESSAGEFACILITY}
-)
+include(MetricPlugins)
+
+cet_build_plugin(pcpmmv metric LIBRARIES REG pcp_mmv)
 
 install_headers()
 install_source()
