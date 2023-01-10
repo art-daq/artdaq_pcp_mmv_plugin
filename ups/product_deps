@@ -37,6 +37,13 @@ e20:s118:prof	e20:s118:prof		-std=c++17
 e26:s118:debug	e26:s118:debug		-std=c++17
 e26:s118:prof	e26:s118:prof		-std=c++17
 
+c7:s117:debug	c7:s117:debug		-std=c++17
+c7:s117:prof	c7:s117:prof		-std=c++17
+e20:s117:debug	e20:s117:debug		-std=c++17
+e20:s117:prof	e20:s117:prof		-std=c++17
+e19:s117:debug	e19:s117:debug		-std=c++17
+e19:s117:prof	e19:s117:prof		-std=c++17
+
 c7:s112:debug	c7:s112:debug		-std=c++17
 c7:s112:prof	c7:s112:prof		-std=c++17
 e20:s112:debug	e20:s112:debug		-std=c++17
