@@ -36,8 +36,8 @@ e20:s124:debug	e20:s124:debug		-std=c++17
 e20:s124:prof	e20:s124:prof		-std=c++17
 e26:s124:debug	e26:s124:debug		-std=c++17
 e26:s124:prof	e26:s124:prof		-std=c++17
-e28:s124:debug	e28:s124:debug		-std=c++17
-e28:s124:prof	e28:s124:prof		-std=c++17
+e28:s124:debug	e28:s124:debug		-std=c++20
+e28:s124:prof	e28:s124:prof		-std=c++20
 
 c14:s123:debug	c14:s123:debug		-std=c++17
 c14:s123:prof	c14:s123:prof		-std=c++17
