@@ -20,7 +20,7 @@ old_style_config_vars
 
 #
 product				version		optional
-artdaq_utilities	v1_08_08
+artdaq_utilities	v1_08_05
 cetmodules			v3_22_02		-	only_for_build
 end_product_list
 
