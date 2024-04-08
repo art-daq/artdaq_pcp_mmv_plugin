@@ -1,6 +1,9 @@
+*#
 *~
-*.png
+*.tmproj
 .editorconfig
 bin/*
 obj/*
 *.vcxproj*
+core.*
+spack-build-*
